@@ -476,7 +476,7 @@ func (check *Checker) inferB(posn positioner, tparams []*TypeParam, targs []Type
 
 	// Setup bidirectional unification between constraints
 	// and the corresponding type arguments (which may be nil!).
-	u := newUnifier(false)
+	u := newUnifier(true)
 	u.x.init(tparams)
 	u.y = u.x // type parameters between LHS and RHS of unification are identical
 
