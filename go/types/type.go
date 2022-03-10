@@ -107,6 +107,12 @@ func coreString(t Type) Type {
 		}
 		return su
 	}
+
+	// Is the constraint just a basic interface without specific types?
+	if InferExt && tpar.iface().typeSet().IsMethodSet() {
+		// ...if yes, unify with the underlying interface type.
+		return under(t.iface())
+	}
 	return nil
 }
 
