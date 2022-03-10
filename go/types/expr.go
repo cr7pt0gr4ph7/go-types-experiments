@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/constant"
-	"go/internal/typeparams"
+	"github.com/cr7pt0gr4ph7/go-types-experiments/go/internal/typeparams"
 	"go/token"
 	"math"
 )
