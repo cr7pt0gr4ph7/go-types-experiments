@@ -41,7 +41,7 @@ const (
 
 	// Whether to panic when unificationDepthLimit is reached. Turn on when
 	// investigating infinite recursion.
-	panicAtUnificationDepthLimit = false
+	panicAtUnificationDepthLimit = true
 
 	// If enableCoreTypeUnification is set, unification will consider
 	// the core types, if any, of non-local (unbound) type parameters.
@@ -54,7 +54,7 @@ const (
 	//   p ⇄ q    type parameters p and q match (p is inferred to be q and vice versa)
 	//   x ≢ y    types x and y cannot be unified
 	//   [p, q, ...] ➞ [x, y, ...]    mapping from type parameters to types
-	traceInference = false
+	traceInference = true
 )
 
 // A unifier maintains the current type parameters for x and y
