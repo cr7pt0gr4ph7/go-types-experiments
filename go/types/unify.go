@@ -473,17 +473,18 @@ func (u *unifier) nify(x, y Type, p *ifacePair) (result bool) {
 		}
 
 	case *Interface:
-		// When unifying a type argument T with its type parameter's constraint C,
-		// we do not require that t.identical(c), but only t.implements(c).
-		// This algorithm therefore mirrors the latter instead of the former.
-		if u.subtyping {
-			// TODO(lw) Implement this
-		}
-
 		// Two interface types are identical if they have the same set of methods with
 		// the same names and identical function types. Lower-case method names from
 		// different packages are always different. The order of the methods is irrelevant.
 		if y, ok := y.(*Interface); ok {
+			// When unifying a type argument T with its type parameter's constraint C,
+			// we do not require that t.identical(c), but only t.implements(c).
+			// This algorithm therefore mirrors the latter instead of the former.
+			if u.subtyping {
+				m, alt := u.missingMethod(x, y)
+				return m == nil
+			}
+
 			xset := x.typeSet()
 			yset := y.typeSet()
 			if xset.comparable != yset.comparable {
@@ -587,4 +588,64 @@ func (u *unifier) nify(x, y Type, p *ifacePair) (result bool) {
 	}
 
 	return false
+}
+
+func (u *unifier) missingMethod(V Type, T *Interface, static bool, p *ifacePair) (method, alt *Func) {
+	if T.NumMethods() == 0 {
+		return
+	}
+
+	// V is an interface
+	if u, _ := under(V).(*Interface); u != nil {
+		tset := u.typeSet()
+		for _, m := range T.typeSet().methods {
+			_, f := tset.LookupMethod(m.pkg, m.name, false)
+
+			if f == nil {
+				if !static {
+					continue
+				}
+				return m, nil
+			}
+
+			if !u.nify(f.typ, m.typ, p) {
+				return m, f
+			}
+		}
+
+		return
+	}
+
+	// V is not an interface
+	for _, m := range T.typeSet().methods {
+		// TODO(gri) should this be calling LookupFieldOrMethod instead (and why not)?
+		obj, _, _ := lookupFieldOrMethod(V, false, m.pkg, m.name, false)
+
+		// check if m is on *V, or on V with case-folding
+		found := obj != nil
+		if !found {
+			// TODO(gri) Instead of NewPointer(V) below, can we just set the "addressable" argument?
+			obj, _, _ = lookupFieldOrMethod(NewPointer(V), false, m.pkg, m.name, false)
+			if obj == nil {
+				obj, _, _ = lookupFieldOrMethod(V, false, m.pkg, m.name, true /* fold case */)
+			}
+		}
+
+		// we must have a method (not a struct field)
+		f, _ := obj.(*Func)
+		if f == nil {
+			return m, nil
+		}
+
+		// methods may not have a fully set up signature yet
+		if check != nil {
+			check.objDecl(f, nil)
+		}
+
+		if !found || !u.nify(f.typ, m.typ, p) {
+			return m, f
+		}
+	}
+
+	return
 }
