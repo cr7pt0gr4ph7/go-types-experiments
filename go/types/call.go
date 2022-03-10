@@ -8,7 +8,7 @@ package types
 
 import (
 	"go/ast"
-	"go/internal/typeparams"
+	"github.com/cr7pt0gr4ph7/go-types-experiments/go/internal/typeparams"
 	"go/token"
 	"strings"
 	"unicode"
