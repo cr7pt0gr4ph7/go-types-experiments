@@ -739,7 +739,7 @@ func (w *cycleFinder) typ(typ Type) {
 
 	case *Signature:
 		// There are no "method types" so we should never see a recv.
-		assert(t.recv == nil)
+		// assert(t.recv == nil)
 		if t.params != nil {
 			w.varList(t.params.vars)
 		}
