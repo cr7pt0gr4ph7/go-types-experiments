@@ -9,7 +9,7 @@ package types
 import (
 	"go/ast"
 	"go/constant"
-	"go/internal/typeparams"
+	"github.com/cr7pt0gr4ph7/go-types-experiments/go/internal/typeparams"
 )
 
 // If e is a valid function instantiation, indexExpr returns true.
