@@ -481,8 +481,7 @@ func (u *unifier) nify(x, y Type, p *ifacePair) (result bool) {
 			// we do not require that t.identical(c), but only t.implements(c).
 			// This algorithm therefore mirrors the latter instead of the former.
 			if u.subtyping {
-				m, alt := u.missingMethod(x, y)
-				return m == nil
+				return u.implements(x, y, p)
 			}
 
 			xset := x.typeSet()
