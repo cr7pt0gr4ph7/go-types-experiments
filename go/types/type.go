@@ -25,6 +25,12 @@ func under(t Type) Type {
 	return t.Underlying()
 }
 
+var InferExt = false
+
+func CoreType(t Type, inferExt bool) Type {
+	return coreTypeImpl(t, inferExt)
+}
+
 // If t is not a type parameter, coreType returns the underlying type.
 // If t is a type parameter, coreType returns the single underlying
 // type of all types in its type set if it exists, or nil otherwise. If the
@@ -32,6 +38,10 @@ func under(t Type) Type {
 // identical element types), the single underlying type is the restricted
 // channel type if the restrictions are always the same, or nil otherwise.
 func coreType(t Type) Type {
+	return coreTypeImpl(t, InferExt)
+}
+
+func coreTypeImpl(t Type, inferExt bool) Type {
 	tpar, _ := t.(*TypeParam)
 	if tpar == nil {
 		return under(t)
@@ -53,6 +63,12 @@ func coreType(t Type) Type {
 		return true
 	}) {
 		return su
+	}
+
+	// Is the constraint just a basic interface without specific types?
+	if inferExt && tpar.iface().typeSet().IsMethodSet() {
+		// ...if yes, unify with the underlying interface type.
+		return under(t.iface())
 	}
 	return nil
 }
