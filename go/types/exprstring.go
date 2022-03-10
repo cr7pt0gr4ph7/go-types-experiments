@@ -10,7 +10,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/ast"
-	"go/internal/typeparams"
+	"github.com/cr7pt0gr4ph7/go-types-experiments/go/internal/typeparams"
 )
 
 // ExprString returns the (possibly shortened) string representation for x.
