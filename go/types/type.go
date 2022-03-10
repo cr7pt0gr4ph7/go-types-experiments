@@ -68,7 +68,7 @@ func coreTypeImpl(t Type, inferExt bool) Type {
 	// Is the constraint just a basic interface without specific types?
 	if inferExt && tpar.iface().typeSet().IsMethodSet() {
 		// ...if yes, unify with the underlying interface type.
-		return under(t.iface())
+		return under(tpar.iface())
 	}
 	return nil
 }
@@ -111,7 +111,7 @@ func coreString(t Type) Type {
 	// Is the constraint just a basic interface without specific types?
 	if InferExt && tpar.iface().typeSet().IsMethodSet() {
 		// ...if yes, unify with the underlying interface type.
-		return under(t.iface())
+		return under(tpar.iface())
 	}
 	return nil
 }
