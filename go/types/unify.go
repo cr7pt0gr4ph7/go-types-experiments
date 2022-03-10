@@ -8,6 +8,7 @@ package types
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -635,6 +636,7 @@ func (u *unifier) implements(V, T Type, p *ifacePair) error {
 
 	// V must implement T's methods, if any.
 	if m, wrong := u.missingMethod(V, Ti, true, p); m != nil /* !Implements(V, Ti) */ {
+		_ = wrong
 		return errorf("%s does not implement %s %s", V, T, "" /* check.missingMethodReason(V, T, m, wrong) */)
 	}
 
@@ -696,8 +698,8 @@ func (u *unifier) missingMethod(V Type, T *Interface, static bool, p *ifacePair)
 	}
 
 	// V is an interface
-	if u, _ := under(V).(*Interface); u != nil {
-		tset := u.typeSet()
+	if v, _ := under(V).(*Interface); u != nil {
+		tset := v.typeSet()
 		for _, m := range T.typeSet().methods {
 			_, f := tset.LookupMethod(m.pkg, m.name, false)
 
