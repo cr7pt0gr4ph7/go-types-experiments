@@ -75,7 +75,7 @@ type unifier struct {
 // direction of channels is ignored.
 // TODO(gri) exact is not set anymore by a caller. Consider removing it.
 func newUnifier(subtyping bool) *unifier {
-	u := &unifier{subtyping: exact, exact: false}
+	u := &unifier{subtyping: subtyping, exact: false}
 	u.x.unifier = u
 	u.y.unifier = u
 	return u
