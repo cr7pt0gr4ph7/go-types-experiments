@@ -62,6 +62,7 @@ const (
 // A unifier is created by calling newUnifier.
 type unifier struct {
 	exact bool
+	subtyping bool
 	x, y  tparamsList // x and y must initialized via tparamsList.init
 	types []Type      // inferred types, shared by x and y
 	depth int         // recursion depth during unification
@@ -73,8 +74,8 @@ type unifier struct {
 // is considered if unification would fail otherwise, and the
 // direction of channels is ignored.
 // TODO(gri) exact is not set anymore by a caller. Consider removing it.
-func newUnifier(exact bool) *unifier {
-	u := &unifier{exact: exact}
+func newUnifier(subtyping bool) *unifier {
+	u := &unifier{subtyping: exact, exact: false}
 	u.x.unifier = u
 	u.y.unifier = u
 	return u
@@ -472,6 +473,13 @@ func (u *unifier) nify(x, y Type, p *ifacePair) (result bool) {
 		}
 
 	case *Interface:
+		// When unifying a type argument T with its type parameter's constraint C,
+		// we do not require that t.identical(c), but only t.implements(c).
+		// This algorithm therefore mirrors the latter instead of the former.
+		if u.subtyping {
+			// TODO(lw) Implement this
+		}
+
 		// Two interface types are identical if they have the same set of methods with
 		// the same names and identical function types. Lower-case method names from
 		// different packages are always different. The order of the methods is irrelevant.
