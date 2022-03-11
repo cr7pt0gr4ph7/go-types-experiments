@@ -296,7 +296,7 @@ func MissingMethod(V Type, T *Interface, static bool) (method *Func, wrongType b
 // If a method is missing on T but is found on *T, or if a method is found
 // on T when looked up with case-folding, this alternative method is returned
 // as the second result.
-func (check *Checker) missingMethod(V Type, T *Interface, static bool) (method, alt *Func) {
+func (check *checkerBase) missingMethod(V Type, T *Interface, static bool) (method, alt *Func) {
 	if T.NumMethods() == 0 {
 		return
 	}
@@ -362,7 +362,7 @@ func (check *Checker) missingMethod(V Type, T *Interface, static bool) (method, 
 // method that matches in some way. It may have the correct name, but wrong type, or
 // it may have a pointer receiver, or it may have the correct name except wrong case.
 // check may be nil.
-func (check *Checker) missingMethodReason(V, T Type, m, alt *Func) string {
+func (check *checkerBase) missingMethodReason(V, T Type, m, alt *Func) string {
 	var mname string
 	if check != nil && compilerErrorMessages {
 		mname = m.Name() + " method"
@@ -401,7 +401,7 @@ func isInterfacePtr(T Type) bool {
 }
 
 // check may be nil.
-func (check *Checker) interfacePtrError(T Type) string {
+func (check *checkerBase) interfacePtrError(T Type) string {
 	assert(isInterfacePtr(T))
 	if p, _ := under(T).(*Pointer); isTypeParam(p.base) {
 		return check.sprintf("type %s is pointer to type parameter, not type parameter", T)
@@ -410,7 +410,7 @@ func (check *Checker) interfacePtrError(T Type) string {
 }
 
 // check may be nil.
-func (check *Checker) funcString(f *Func) string {
+func (check *checkerBase) funcString(f *Func) string {
 	buf := bytes.NewBufferString(f.name)
 	var qf Qualifier
 	if check != nil {
@@ -426,7 +426,7 @@ func (check *Checker) funcString(f *Func) string {
 // The receiver may be nil if assertableTo is invoked through an exported API call
 // (such as AssertableTo), i.e., when all methods have been type-checked.
 // TODO(gri) replace calls to this function with calls to newAssertableTo.
-func (check *Checker) assertableTo(V *Interface, T Type) (method, wrongType *Func) {
+func (check *checkerBase) assertableTo(V *Interface, T Type) (method, wrongType *Func) {
 	// no static check is required if T is an interface
 	// spec: "If T is an interface type, x.(T) asserts that the
 	//        dynamic type of x implements the interface T."
@@ -440,7 +440,7 @@ func (check *Checker) assertableTo(V *Interface, T Type) (method, wrongType *Fun
 // newAssertableTo reports whether a value of type V can be asserted to have type T.
 // It also implements behavior for interfaces that currently are only permitted
 // in constraint position (we have not yet defined that behavior in the spec).
-func (check *Checker) newAssertableTo(V *Interface, T Type) error {
+func (check *checkerBase) newAssertableTo(V *Interface, T Type) error {
 	// no static check is required if T is an interface
 	// spec: "If T is an interface type, x.(T) asserts that the
 	//        dynamic type of x implements the interface T."
