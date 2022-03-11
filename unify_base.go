@@ -1,12 +1,12 @@
 package types
 
-type unifierBase struct {
+type checkerBase struct {
 }
 
 // implements checks if V implements T and reports an error if it doesn't.
 // The receiver may be nil if implements is called through an exported
 // API call such as AssignableTo.
-func (u *unifierBase) implements(V, T Type) error {
+func (check *checkerBase) implements(V, T Type) error {
 	Vu := under(V)
 	Tu := under(T)
 	if Vu == Typ[Invalid] || Tu == Typ[Invalid] {
@@ -24,9 +24,9 @@ func (u *unifierBase) implements(V, T Type) error {
 	if Ti == nil {
 		var cause string
 		if isInterfacePtr(Tu) {
-			cause = fmt.Sprintf("type %s is pointer to interface, not interface", T)
+			cause = check.sprintf("type %s is pointer to interface, not interface", T)
 		} else {
-			cause = fmt.Sprintf("%s is not an interface", T)
+			cause = check.Sprintf("%s is not an interface", T)
 		}
 		return errorf("%s does not implement %s (%s)", V, T, cause)
 	}
@@ -51,7 +51,7 @@ func (u *unifierBase) implements(V, T Type) error {
 	}
 
 	// V must implement T's methods, if any.
-	if m, wrong := u.missingMethod(V, Ti, true); m != nil /* !Implements(V, Ti) */ {
+	if m, wrong := check.missingMethod(V, Ti, true); m != nil /* !Implements(V, Ti) */ {
 		return errorf("%s does not implement %s %s", V, T, check.missingMethodReason(V, T, m, wrong))
 	}
 
