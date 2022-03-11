@@ -466,7 +466,7 @@ func Implements(V Type, T *Interface) bool {
 	if V.Underlying() == Typ[Invalid] {
 		return false
 	}
-	return (*Checker)(nil).implements(V, T) == nil
+	return new(checkerBase).implements(V, T) == nil
 }
 
 // Identical reports whether x and y are identical types.
