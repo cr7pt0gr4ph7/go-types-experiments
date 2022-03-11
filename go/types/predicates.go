@@ -176,6 +176,10 @@ func (p *ifacePair) identical(q *ifacePair) bool {
 
 // For changes to this code the corresponding changes should be made to unifier.nify.
 func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
+	return new(checkerBase).identical(x, y, cmpTags, p)
+}
+
+func (check *checkerBase) identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 	if x == y {
 		return true
 	}
@@ -201,7 +205,7 @@ func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 	case *Slice:
 		// Two slice types are identical if they have identical element types.
 		if y, ok := y.(*Slice); ok {
-			return identical(x.elem, y.elem, cmpTags, p)
+			return check.identical(x.elem, y.elem, cmpTags, p)
 		}
 
 	case *Struct:
@@ -216,7 +220,7 @@ func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 					if f.embedded != g.embedded ||
 						cmpTags && x.Tag(i) != y.Tag(i) ||
 						!f.sameId(g.pkg, g.name) ||
-						!identical(f.typ, g.typ, cmpTags, p) {
+						!check.identical(f.typ, g.typ, cmpTags, p) {
 						return false
 					}
 				}
@@ -227,7 +231,7 @@ func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 	case *Pointer:
 		// Two pointer types are identical if they have identical base types.
 		if y, ok := y.(*Pointer); ok {
-			return identical(x.base, y.base, cmpTags, p)
+			return check.identical(x.base, y.base, cmpTags, p)
 		}
 
 	case *Tuple:
@@ -238,7 +242,7 @@ func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 				if x != nil {
 					for i, v := range x.vars {
 						w := y.vars[i]
-						if !identical(v.typ, w.typ, cmpTags, p) {
+						if !check.identical(v.typ, w.typ, cmpTags, p) {
 							return false
 						}
 					}
@@ -280,12 +284,10 @@ func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 			}
 			smap := makeSubstMap(ytparams, targs)
 
-			var check *Checker // ok to call subst on a nil *Checker
-
 			// Constraints must be pair-wise identical, after substitution.
 			for i, xtparam := range xtparams {
 				ybound := check.subst(token.NoPos, ytparams[i].bound, smap, nil)
-				if !identical(xtparam.bound, ybound, cmpTags, p) {
+				if !check.identical(xtparam.bound, ybound, cmpTags, p) {
 					return false
 				}
 			}
@@ -295,8 +297,8 @@ func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 		}
 
 		return x.variadic == y.variadic &&
-			identical(x.params, yparams, cmpTags, p) &&
-			identical(x.results, yresults, cmpTags, p)
+			check.identical(x.params, yparams, cmpTags, p) &&
+			check.identical(x.results, yresults, cmpTags, p)
 
 	case *Union:
 		if y, _ := y.(*Union); y != nil {
@@ -374,14 +376,14 @@ func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 	case *Map:
 		// Two map types are identical if they have identical key and value types.
 		if y, ok := y.(*Map); ok {
-			return identical(x.key, y.key, cmpTags, p) && identical(x.elem, y.elem, cmpTags, p)
+			return check.identical(x.key, y.key, cmpTags, p) && identical(x.elem, y.elem, cmpTags, p)
 		}
 
 	case *Chan:
 		// Two channel types are identical if they have identical value types
 		// and the same direction.
 		if y, ok := y.(*Chan); ok {
-			return x.dir == y.dir && identical(x.elem, y.elem, cmpTags, p)
+			return x.dir == y.dir && check.identical(x.elem, y.elem, cmpTags, p)
 		}
 
 	case *Named:
@@ -398,11 +400,11 @@ func identical(x, y Type, cmpTags bool, p *ifacePair) bool {
 			if len(xargs) > 0 {
 				// Instances are identical if their original type and type arguments
 				// are identical.
-				if !Identical(x.orig, y.orig) {
+				if !check.identical(x.orig, y.orig, false, p) {
 					return false
 				}
 				for i, xa := range xargs {
-					if !Identical(xa, yargs[i]) {
+					if !check.identical(xa, yargs[i], false, p) {
 						return false
 					}
 				}
