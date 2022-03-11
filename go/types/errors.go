@@ -63,6 +63,10 @@ func (check *Checker) markImports(pkg *Package) {
 	}
 }
 
+func (check *checkerBase) sprintf(format string, args ...any) string {
+	return check.checker.sprintf(format, args...)
+}
+
 // check may be nil.
 func (check *Checker) sprintf(format string, args ...any) string {
 	var fset *token.FileSet
